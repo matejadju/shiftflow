@@ -38,3 +38,6 @@ V repozitoriju je pripravljena dokumentacija in projektna struktura. Implementac
 ## Razvojni proces
 
 Glavna veja je `main`. Spremembe se pripravljajo na ločenih razvojnih vejah in vključujejo v `main` prek pull requestov po strategiji GitHub Flow. Pomembne nove arhitekturne odločitve zabeležimo kot dodatne ADR-je; spremembo obstoječe odločitve dokumentiramo z novim ADR-jem, ki navede prejšnjega.
+
+
+Vsak pull request mora vsebovati kratek opis opravljenih sprememb.

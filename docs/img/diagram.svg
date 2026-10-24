@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 245" role="img" aria-labelledby="title desc">
+<title id="title">Arhitektura aplikacije ShiftFlow</title>
+<desc id="desc">Frontend React in TypeScript prek REST API-ja komunicira z backendom Node.js in Express, ki s Prisma ORM dostopa do podatkovne baze PostgreSQL.</desc>
+<rect width="920" height="245" fill="white"/>
+<g font-family="Arial, Helvetica, sans-serif" fill="#263446" text-anchor="middle">
+<rect x="22" y="62" width="244" height="116" rx="10" fill="#f6f8fa" stroke="#67717d" stroke-width="2"/>
+<text x="144" y="103" font-size="23" font-weight="bold">Frontend</text>
+<text x="144" y="140" font-size="18">React + TypeScript</text>
+<rect x="340" y="62" width="244" height="116" rx="10" fill="#f6f8fa" stroke="#67717d" stroke-width="2"/>
+<text x="462" y="103" font-size="23" font-weight="bold">Backend</text>
+<text x="462" y="133" font-size="17">Node.js + Express</text>
+<text x="462" y="158" font-size="17">Prisma ORM</text>
+<rect x="658" y="62" width="244" height="116" rx="10" fill="#f6f8fa" stroke="#67717d" stroke-width="2"/>
+<text x="780" y="103" font-size="23" font-weight="bold">Podatkovna baza</text>
+<text x="780" y="140" font-size="18">PostgreSQL</text>
+<text x="301" y="94" font-size="14">HTTP / JSON</text>
+<text x="622" y="94" font-size="14">ORM / SQL</text>
+<text x="462" y="218" font-size="15" fill="#526070">JWT, bcrypt in Zod na zalednem delu</text>
+</g>
+<g stroke="#596575" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M273 124H331"/><path d="M321 116l10 8-10 8"/><path d="M273 146H331"/><path d="M283 138l-10 8 10 8"/>
+<path d="M591 124H649"/><path d="M639 116l10 8-10 8"/><path d="M591 146H649"/><path d="M601 138l-10 8 10 8"/>
+</g></svg>

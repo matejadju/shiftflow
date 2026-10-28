@@ -23,7 +23,7 @@ Izbrana je **trislojna spletna arhitektura**: React frontend komunicira z Node.j
 
 * Jasna delitev odgovornosti in možnost samostojnega testiranja poslovnih pravil.
 * Centralno preverjanje dostopa in pravil menjav.
-* Ločene, razumljive komponente imajo predvidljiv vzdrževalni odtis.
+* Posamezne plasti sistema je mogoče spreminjati in nadgrajevati neodvisno, če ostanejo dogovorjeni vmesniki med njimi nespremenjeni.
 
 ### Negativne
 

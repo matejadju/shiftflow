@@ -38,8 +38,9 @@ Pripravljeno je začetno razvojno okolje:
 - Express in TypeScript backend z endpointom `/api/health`.
 - PostgreSQL v Docker Compose.
 
-Prijava, podatkovni modeli in upravljanje izmen še niso implementirani.
-Health endpoint trenutno preverja dosegljivost API-ja, ne povezave z bazo.
+Implementirani so Prisma modeli User, Shift, Unavailability in SwapRequest,
+začetna migracija ter začetni uporabniki za lokalni razvoj.
+Prijava in upravljanje izmen še nista implementirana.Health endpoint trenutno preverja dosegljivost API-ja, ne povezave z bazo.
 
 ## Lokalni zagon
 
@@ -82,6 +83,52 @@ dosegljiva na `localhost:5432` z uporabnikom `shiftflow` in geslom iz `.env`.
 
 Podatki se hranijo v Docker volume-u. Sprememba gesla v `.env` ne spremeni
 gesla v že inicializirani bazi.
+
+### Priprava podatkovne baze s Prisma
+
+Po namestitvi odvisnosti v mapi `backend` v datoteki `backend/.env`
+nastavimo:
+
+```dotenv
+DATABASE_URL=postgresql://shiftflow:YOUR_PASSWORD@localhost:5432/shiftflow?schema=public
+SEED_PASSWORD=YOUR_LOCAL_TEST_PASSWORD
+```
+
+`YOUR_PASSWORD` zamenjamo z geslom za PostgreSQL iz glavne datoteke `.env`.
+Posebne znake v geslu v povezovalnem URL-ju ustrezno URL-kodiramo.
+`SEED_PASSWORD` mora vsebovati vsaj 12 znakov.
+
+Ob zagnani bazi v mapi `backend` izvedemo:
+
+```powershell
+npm.cmd ci
+npm.cmd exec -- prisma generate
+npm.cmd exec -- prisma migrate deploy
+npm.cmd exec -- prisma db seed
+npm.cmd exec -- tsx prisma/verify-seed.ts
+```
+
+Ukazi pripravijo tudi prazno bazo. Ustvarjeni so naslednji lokalni
+testni uporabniki:
+
+| E-pošta | Vloga |
+| --- | --- |
+| maja.vodja@example.com | MANAGER |
+| ana.novak@example.com | EMPLOYEE |
+| luka.kovac@example.com | EMPLOYEE |
+
+Novi uporabniki dobijo geslo iz `SEED_PASSWORD`, shranjeno z bcrypt.
+Ponovljen seed ne podvoji uporabnikov in ne spremeni obstoječih gesel.
+
+Migracije hranimo v Git. Generirani Prisma klient je izključen iz Git
+in ga po pridobitvi projekta ustvarimo z `prisma generate`.
+
+Za novo spremembo modelov med razvojem uporabimo
+`npm.cmd exec -- prisma migrate dev --name opis_spremembe`.
+Že uporabljenih migracij ne spreminjamo.
+
+Začetna migracija vsebuje tudi omejitve za veljavnost časovnih intervalov,
+različna udeleženca menjave ter največ eno odprto zahtevo na izmeno.
 
 ### 3. Backend
 

@@ -1,0 +1,98 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "cjs"
+  generatedFileExtension = "ts"
+  importFileExtension    = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+enum ShiftStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum SwapStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  APPROVED
+}
+
+model User {
+  id           String @id @default(uuid()) @db.Uuid
+  firstName    String
+  lastName     String
+  email        String @unique
+  passwordHash String
+  role         Role   @default(EMPLOYEE)
+
+  shifts               Shift[]
+  unavailabilities     Unavailability[]
+  sentSwapRequests     SwapRequest[]    @relation("SwapRequester")
+  receivedSwapRequests SwapRequest[]    @relation("SwapRecipient")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Shift {
+  id         String      @id @default(uuid()) @db.Uuid
+  employeeId String      @db.Uuid
+  date       DateTime    @db.Date
+  startTime  DateTime    @db.Time(0)
+  endTime    DateTime    @db.Time(0)
+  status     ShiftStatus @default(DRAFT)
+
+  employee     User          @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  swapRequests SwapRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId, date])
+  @@index([date, status])
+}
+
+model Unavailability {
+  id         String   @id @default(uuid()) @db.Uuid
+  employeeId String   @db.Uuid
+  date       DateTime @db.Date
+  startTime  DateTime @db.Time(0)
+  endTime    DateTime @db.Time(0)
+
+  employee User @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId, date])
+}
+
+model SwapRequest {
+  id          String     @id @default(uuid()) @db.Uuid
+  shiftId     String     @db.Uuid
+  requesterId String     @db.Uuid
+  recipientId String     @db.Uuid
+  status      SwapStatus @default(PENDING)
+
+  shift     Shift @relation(fields: [shiftId], references: [id], onDelete: Restrict)
+  requester User  @relation("SwapRequester", fields: [requesterId], references: [id], onDelete: Restrict)
+  recipient User  @relation("SwapRecipient", fields: [recipientId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shiftId, status])
+  @@index([requesterId, status])
+  @@index([recipientId, status])
+}

@@ -1,0 +1,70 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.welcome {
+  width: 100%;
+  max-width: 640px;
+  padding: clamp(24px, 6vw, 56px);
+  background: #ffffff;
+  border: 1px solid #dce4e0;
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgb(25 57 43 / 6%);
+}
+
+.eyebrow {
+  margin: 0 0 16px;
+  color: #357458;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  letter-spacing: -0.05em;
+}
+
+.description {
+  margin: 16px 0 28px;
+  color: #52635a;
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.status-dot--loading {
+  background: #a87916;
+}
+
+.status-dot--available {
+  background: #25834d;
+}
+
+.status-dot--unavailable {
+  background: #c13d3d;
+}
+
+.note {
+  margin: 28px 0 0;
+  color: #65736b;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}

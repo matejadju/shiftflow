@@ -48,3 +48,6 @@ Desktop.ini
 # Gradnja Docker / razvojni volume
 postgres-data/
 **/postgres-data/
+
+# Generirana Prisma koda
+backend/src/generated/prisma/

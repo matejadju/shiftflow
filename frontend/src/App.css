@@ -68,3 +68,67 @@ h1 {
   font-size: 0.875rem;
   line-height: 1.6;
 }
+.login-form {
+  display: grid;
+  gap: 12px;
+}
+
+.login-form label {
+  font-weight: 600;
+}
+
+.login-form input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #aabbb1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #19392b;
+}
+
+.login-form input:focus-visible,
+button:focus-visible,
+.button-link:focus-visible {
+  outline: 3px solid #73a98b;
+  outline-offset: 3px;
+}
+
+button,
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid #256543;
+  border-radius: 8px;
+  background: #256543;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+button.secondary {
+  background: #ffffff;
+  color: #256543;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.error-message {
+  margin: 4px 0;
+  color: #a32626;
+}

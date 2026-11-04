@@ -132,3 +132,136 @@ button.secondary {
   margin: 4px 0;
   color: #a32626;
 }
+.schedule-page {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.schedule-header,
+.week-controls,
+.publish-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.schedule-header {
+  margin-bottom: 28px;
+}
+
+.schedule-header h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.schedule-header .actions {
+  margin-top: 0;
+}
+
+.schedule-panel {
+  padding: clamp(20px, 4vw, 36px);
+  background: #ffffff;
+  border: 1px solid #dce4e0;
+  border-radius: 16px;
+}
+
+.week-controls label,
+.shift-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.schedule-page input,
+.schedule-page select {
+  min-height: 44px;
+  min-width: 0;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #aabbb1;
+  border-radius: 8px;
+  color: #19392b;
+  background: #ffffff;
+}
+
+.schedule-page input:focus-visible,
+.schedule-page select:focus-visible {
+  outline: 3px solid #73a98b;
+  outline-offset: 3px;
+}
+
+.shift-form {
+  margin: 28px 0;
+  padding: 20px;
+  background: #f3f6f4;
+  border-radius: 12px;
+}
+
+.shift-form h3 {
+  margin-top: 0;
+}
+
+.shift-form fieldset {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-items: end;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.publish-bar {
+  margin: 24px 0 16px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #dce4e0;
+  white-space: nowrap;
+}
+
+th {
+  background: #f3f6f4;
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.badge--DRAFT {
+  background: #fff1ce;
+  color: #795308;
+}
+
+.badge--PUBLISHED {
+  background: #e0f2e6;
+  color: #21623a;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

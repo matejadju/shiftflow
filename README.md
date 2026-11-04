@@ -44,7 +44,9 @@ začetna migracija ter začetni uporabniki za lokalni razvoj.
 Implementirana sta API za prijavo z JWT in preverjanje dostopa glede
 na uporabniško vlogo. Implementirani so prijavni obrazec, zaščitene strani, navigacija glede
 na uporabniško vlogo in odjava. Po poteku prijave aplikacija uporabnika
-preusmeri na ponovno prijavo. Upravljanje izmen še ni implementirano.
+preusmeri na ponovno prijavo. Vodja lahko v tedenskem pregledu ustvarja osnutke izmen, jih dodeljuje
+zaposlenim in objavi urnik. Osebni koledar zaposlenega in menjave izmen
+še niso implementirani.
 
 ## Lokalni zagon
 
@@ -241,6 +243,22 @@ HTTP strežnika ni treba posebej zagnati.
 
 Testi preverjajo prijavo, JWT žetone, uporabniške vloge, ustvarjanje
 izmen, validacijo datumov in časov ter pregled in objavo tedenskega urnika.
+
+## Priprava urnika v uporabniškem vmesniku
+
+1. Prijavimo se kot vodja (`maja.vodja@example.com`).
+2. Izberemo »Pregled za vodjo«.
+3. Z gumboma ali datumskim poljem izberemo teden.
+4. Izberemo zaposlenega, datum ter začetno in končno uro.
+5. Z gumbom »Shrani osnutek« ustvarimo izmeno.
+6. Z gumbom »Objavi urnik« objavimo vse osnutke izbranega tedna.
+
+Osnutki in objavljene izmene so označeni z različnima statusoma.
+Konec izmene mora biti po začetku, datum v obrazcu pa znotraj
+izbranega tedna. Ko ni osnutkov, je objava onemogočena.
+
+Ob napaki pri nalaganju je na voljo ponoven poskus.
+Če API zavrne prijavo z odgovorom 401, je potrebna ponovna prijava.
 
 ## API za pripravo in objavo urnika
 

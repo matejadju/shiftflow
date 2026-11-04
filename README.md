@@ -40,7 +40,10 @@ Pripravljeno je začetno razvojno okolje:
 
 Implementirani so Prisma modeli User, Shift, Unavailability in SwapRequest,
 začetna migracija ter začetni uporabniki za lokalni razvoj.
-Prijava in upravljanje izmen še nista implementirana.Health endpoint trenutno preverja dosegljivost API-ja, ne povezave z bazo.
+
+Implementirana sta API za prijavo z JWT in preverjanje dostopa glede
+na uporabniško vlogo. Prijavni obrazec in upravljanje izmen še nista
+implementirana.
 
 ## Lokalni zagon
 
@@ -145,6 +148,16 @@ Endpoint `http://localhost:3000/api/health` vrne:
 
 `{"status":"ok","service":"shiftflow-api"}`
 
+Za zagon backenda potrebujemo tudi `JWT_SECRET` v datoteki `backend/.env`.
+Naključno vrednost ustvarimo z ukazom:
+
+```powershell
+node -e "console.log(require('node:crypto').randomBytes(48).toString('hex'))"
+```
+
+Rezultat shranimo kot `JWT_SECRET`. Ključa ne vključujemo v Git.
+Backend ob zagonu preveri konfiguracijo in povezavo s podatkovno bazo.
+
 ### 4. Frontend
 
 V drugem terminalu:
@@ -159,6 +172,56 @@ Aplikacijo odpremo na `http://localhost:5173`.
 Ob delujočem backendu prikaže »Povezava z API je vzpostavljena.«
 
 Vite med razvojem posreduje zahteve `/api` backendu na portu 3000.
+
+## Prijava in preverjanje dostopa
+
+### POST /api/auth/login
+
+Telo zahteve JSON:
+
+```json
+{
+  "email": "ana.novak@example.com",
+  "password": "<geslo lokalnega testnega uporabnika>"
+}
+```
+
+Uspešna prijava vrne JWT žeton in osnovne podatke uporabnika.
+Geslo in njegova zgoščena vrednost nista vključena v odgovor.
+Žeton velja eno uro.
+
+### GET /api/auth/me
+
+Zahteva mora vsebovati glavo:
+
+```text
+Authorization: Bearer <žeton>
+```
+
+Endpoint vrne podatke prijavljenega uporabnika. Middleware pri vsakem
+zahtevku preveri žeton in pridobi trenutno uporabniško vlogo iz baze.
+
+### Odzivi ob napakah
+
+- `400`: neveljavni vhodni podatki.
+- `401`: napačni prijavni podatki ali manjkajoč, neveljaven oziroma potekel žeton.
+- `403`: uporabnik nima zahtevane vloge.
+
+## Avtomatizirani testi backenda
+
+Testi zahtevajo zagnano PostgreSQL bazo z uporabljeno migracijo,
+seed uporabnike ter nastavljeni spremenljivki `JWT_SECRET` in
+`SEED_PASSWORD` v `backend/.env`.
+
+Iz mape `backend` izvedemo:
+
+```powershell
+npm.cmd run test
+```
+
+Testi preverijo uspešno prijavo, vhodne podatke, napačno geslo,
+neobstoječega uporabnika, veljavnost žetonov in dostop glede na vlogo.
+HTTP strežnika ni treba posebej zagnati.
 
 ### Preverjanje
 

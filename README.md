@@ -42,8 +42,9 @@ Implementirani so Prisma modeli User, Shift, Unavailability in SwapRequest,
 začetna migracija ter začetni uporabniki za lokalni razvoj.
 
 Implementirana sta API za prijavo z JWT in preverjanje dostopa glede
-na uporabniško vlogo. Prijavni obrazec in upravljanje izmen še nista
-implementirana.
+na uporabniško vlogo. Implementirani so prijavni obrazec, zaščitene strani, navigacija glede
+na uporabniško vlogo in odjava. Po poteku prijave aplikacija uporabnika
+preusmeri na ponovno prijavo. Upravljanje izmen še ni implementirano.
 
 ## Lokalni zagon
 
@@ -169,9 +170,16 @@ V drugem terminalu:
 `npm.cmd run dev`
 
 Aplikacijo odpremo na `http://localhost:5173`.
-Ob delujočem backendu prikaže »Povezava z API je vzpostavljena.«
+Neprijavljen uporabnik je preusmerjen na `/login`.
 
-Vite med razvojem posreduje zahteve `/api` backendu na portu 3000.
+Za prijavo uporabimo začetne uporabnike in geslo iz `SEED_PASSWORD`.
+Zaposleni dostopa do začetne strani, vodja pa tudi do `/manager`.
+
+JWT žeton se hrani v `sessionStorage` trenutne kartice.
+Osvežitev strani ohrani prijavo, odjava odstrani žeton.
+Po poteku žetona je potrebna ponovna prijava.
+
+Zaščita strani v brskalniku dopolnjuje preverjanje pravic na backendu.
 
 ## Prijava in preverjanje dostopa
 

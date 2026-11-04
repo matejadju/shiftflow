@@ -217,19 +217,70 @@ zahtevku preveri žeton in pridobi trenutno uporabniško vlogo iz baze.
 
 ## Avtomatizirani testi backenda
 
-Testi zahtevajo zagnano PostgreSQL bazo z uporabljeno migracijo,
-seed uporabnike ter nastavljeni spremenljivki `JWT_SECRET` in
-`SEED_PASSWORD` v `backend/.env`.
+Testi uporabljajo ločeno bazo `shiftflow_api_test` na istem PostgreSQL
+strežniku kot razvojna baza. Razvojne baze `shiftflow` ne spreminjajo.
 
-Iz mape `backend` izvedemo:
+Ob zagnanem Docker Compose testno bazo enkrat ustvarimo:
+
+```powershell
+docker compose exec database psql -U shiftflow -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE shiftflow_api_test;"
+```
+
+Če baza že obstaja, tega koraka ne ponavljamo.
+
+V `backend/.env` morajo biti nastavljeni `DATABASE_URL`, `JWT_SECRET`
+in `SEED_PASSWORD`. Nato iz mape `backend` izvedemo:
 
 ```powershell
 npm.cmd run test
 ```
 
-Testi preverijo uspešno prijavo, vhodne podatke, napačno geslo,
-neobstoječega uporabnika, veljavnost žetonov in dostop glede na vlogo.
+Ukaz uporabi povezavo iz `DATABASE_URL`, ime baze pa zamenja z
+`shiftflow_api_test`. Izvede migracije, seed in teste.
 HTTP strežnika ni treba posebej zagnati.
+
+Testi preverjajo prijavo, JWT žetone, uporabniške vloge, ustvarjanje
+izmen, validacijo datumov in časov ter pregled in objavo tedenskega urnika.
+
+## API za pripravo in objavo urnika
+
+Vse poti `/api/shifts` zahtevajo prijavo in vlogo `MANAGER`.
+Zahteva mora vsebovati glavo `Authorization: Bearer <žeton>`.
+
+- `GET /api/shifts/employees` vrne zaposlene za dodeljevanje izmen.
+- `POST /api/shifts` ustvari izmeno v stanju `DRAFT`.
+- `GET /api/shifts?weekStart=2030-01-07` vrne osnutke in objavljene
+  izmene izbranega tedna za vodjo.
+- `POST /api/shifts/publish` objavi vse osnutke izbranega tedna.
+
+Primer telesa zahteve za ustvarjanje izmene:
+
+```json
+{
+  "employeeId": "<UUID zaposlenega>",
+  "date": "2030-01-07",
+  "startTime": "08:00",
+  "endTime": "16:00"
+}
+```
+
+Konec izmene mora biti po začetku. Izbrani uporabnik mora imeti vlogo
+`EMPLOYEE`. Statusa ni mogoče določiti pri ustvarjanju.
+
+Primer telesa zahteve za objavo:
+
+```json
+{
+  "weekStart": "2030-01-07"
+}
+```
+
+`weekStart` mora biti ponedeljek. Teden vključuje ponedeljek do nedelje.
+Objava vrne `publishedCount`, število novo objavljenih izmen.
+Ponovljena objava brez novih osnutkov vrne `0`.
+
+Zaposleni do teh poti nimajo dostopa. Osebni pregled objavljenih izmen
+bo dodan v ločeni nalogi.
 
 ### Preverjanje
 

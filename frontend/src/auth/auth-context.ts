@@ -14,6 +14,8 @@ export type AuthContextValue = {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   retry: () => void;
+  token: string | null;
+  expireSession: () => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | undefined>(

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { ApiError, getCurrentUser, login } from "../api/auth";
 import type { User } from "../api/auth";
@@ -36,29 +36,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState("");
   const [attempt, setAttempt] = useState(0);
 
+  const expireSession = useCallback(() => {
+    sessionStorage.removeItem(TOKEN_KEY);
+    setToken(null);
+    setUser(null);
+    setStatus("anonymous");
+    setMessage("Prijava je potekla. Prijavite se ponovno.");
+  }, []);
+
   useEffect(() => {
     if (!token) {
       return;
     }
 
+    const currentToken = token;
     const controller = new AbortController();
     let expirationTimer: ReturnType<typeof setTimeout> | undefined;
 
-    function expireSession() {
-      sessionStorage.removeItem(TOKEN_KEY);
-      setToken(null);
-      setUser(null);
-      setStatus("anonymous");
-      setMessage("Prijava je potekla. Prijavite se ponovno.");
-    }
-
     async function restoreSession() {
-      // Ta razčlenitev je samo za časovnik vmesnika.
-      // Veljavnost podpisa in pravice vedno preverja backend.
+      // Čas poteka je namenjen časovniku vmesnika.
+      // Podpis žetona in pravice preverja backend.
       let expiresAt: number;
 
       try {
-        expiresAt = getExpiration(token!);
+        expiresAt = getExpiration(currentToken);
       } catch {
         if (!controller.signal.aborted) {
           expireSession();
@@ -71,14 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      expirationTimer = setTimeout(
-        expireSession,
-        Math.min(expiresAt - Date.now(), 2_147_483_647)
-      );
+      expirationTimer = setTimeout(() => {
+        controller.abort();
+        expireSession();
+      }, Math.min(expiresAt - Date.now(), 2_147_483_647));
 
       try {
         const currentUser = await getCurrentUser(
-          token!,
+          currentToken,
           controller.signal
         );
 
@@ -111,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       controller.abort();
       clearTimeout(expirationTimer);
     };
-  }, [token, attempt]);
+  }, [token, attempt, expireSession]);
 
   async function signIn(email: string, password: string) {
     const result = await login(email, password);
@@ -139,7 +140,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, status, message, signIn, signOut, retry }}
+      value={{
+        user,
+        token,
+        status,
+        message,
+        signIn,
+        signOut,
+        expireSession,
+        retry
+      }}
     >
       {children}
     </AuthContext.Provider>

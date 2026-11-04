@@ -23,8 +23,9 @@ export class ApiError extends Error {
   }
 }
 
-async function readResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
+export async function readResponse<T>(
+  response: Response
+): Promise<T> {  if (!response.ok) {
     let message = "Zahteve ni bilo mogoče izvesti.";
 
     try {

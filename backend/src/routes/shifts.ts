@@ -14,6 +14,7 @@ import {
   publishWeekSchema,
   weekQuerySchema
 } from "../validation/shifts.js";
+import { isShiftOverlapError } from "../lib/shift-conflict.js";
 
 const router = Router();
 
@@ -82,6 +83,9 @@ router.post("/", async (req, res, next) => {
     return;
   }
 
+  const conflictMessage =
+    "Zaposleni ima v izbranem času že dodeljeno izmeno.";
+
   try {
     const input = result.data;
 
@@ -97,12 +101,31 @@ router.post("/", async (req, res, next) => {
       return;
     }
 
+    const date = toDatabaseDate(input.date);
+    const startTime = toDatabaseTime(input.startTime);
+    const endTime = toDatabaseTime(input.endTime);
+
+    const overlappingShift = await prisma.shift.findFirst({
+      where: {
+        employeeId: input.employeeId,
+        date,
+        startTime: { lt: endTime },
+        endTime: { gt: startTime }
+      },
+      select: { id: true }
+    });
+
+    if (overlappingShift) {
+      res.status(409).json({ message: conflictMessage });
+      return;
+    }
+
     const shift = await prisma.shift.create({
       data: {
         employeeId: input.employeeId,
-        date: toDatabaseDate(input.date),
-        startTime: toDatabaseTime(input.startTime),
-        endTime: toDatabaseTime(input.endTime),
+        date,
+        startTime,
+        endTime,
         status: ShiftStatus.DRAFT
       },
       include: {
@@ -112,6 +135,12 @@ router.post("/", async (req, res, next) => {
 
     res.status(201).json({ shift: serializeShift(shift) });
   } catch (error) {
+    // Omejitev baze prepreči tudi prekrivanje ob sočasnih zahtevah.
+    if (isShiftOverlapError(error)) {
+      res.status(409).json({ message: conflictMessage });
+      return;
+    }
+
     next(error);
   }
 });

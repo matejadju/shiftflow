@@ -2,22 +2,24 @@
 
 Spletna aplikacija za organizacijo delovnih izmen v manjših podjetjih.
 
-## Trenutno stanje
+## Funkcionalnosti
 
-Implementirano:
-- Prijava z JWT, uporabniške vloge, zaščitene strani in odjava.
+- Prijava z JWT, preverjanje vlog, zaščitene strani in odjava.
 - Priprava, dodeljevanje in objava tedenskega urnika za vodjo.
-- API za pregled lastnih objavljenih izmen zaposlenega.
-- Podatkovni modeli, migracije in začetni uporabniki.
-- Koledarski pregled lastnih objavljenih izmen s preklapljanjem med tedni.
+- Koledarski pregled lastnih objavljenih izmen zaposlenega.
+- API za dodajanje, pregled in brisanje lastne nerazpoložljivosti
+  (v razvoju – T09).
 
-Nerazpoložljivost in menjave izmen sledijo v naslednjih nalogah.
+Vmesnik za nerazpoložljivost in menjave izmen sledijo v naslednjih nalogah.
+Preprečevanje prekrivanja izmen pri ustvarjanju še ni implementirano.
 
 ## Tehnologije
 
 React, TypeScript, Vite, Express, PostgreSQL, Prisma, JWT, bcrypt in Zod.
 
-Projekt sestavljajo `frontend/`, `backend/` in dokumentacija v `docs/`.
+- `frontend/` – uporabniški vmesnik.
+- `backend/` – REST API, poslovna logika in migracije.
+- `docs/` – projektna dokumentacija.
 
 ## Lokalni zagon
 
@@ -26,34 +28,41 @@ Spodnji ukazi so za Windows PowerShell.
 
 ### 1. Konfiguracija
 
-Iz glavne mape ob prvi pripravi kopiramo predlogi:
+Ob prvi pripravi iz glavne mape kopiramo predlogi:
 
 ```powershell
 Copy-Item .env.example .env
 Copy-Item backend/.env.example backend/.env
 ```
 
-V glavni `.env` nastavimo `POSTGRES_PASSWORD`.
+V glavni `.env` nastavimo:
+
+```dotenv
+POSTGRES_PASSWORD=YOUR_DATABASE_PASSWORD
+```
 
 V `backend/.env` nastavimo:
 
 ```dotenv
 PORT=3000
 FRONTEND_URL=http://localhost:5173
-DATABASE_URL=postgresql://shiftflow:YOUR_PASSWORD@localhost:5432/shiftflow?schema=public
+DATABASE_URL=postgresql://shiftflow:YOUR_DATABASE_PASSWORD@localhost:5432/shiftflow?schema=public
 SEED_PASSWORD=YOUR_LOCAL_TEST_PASSWORD
 JWT_SECRET=YOUR_GENERATED_SECRET
 ```
 
-- `YOUR_PASSWORD`: geslo PostgreSQL iz glavne `.env`; posebne znake URL-kodiramo.
-- `SEED_PASSWORD`: lokalno testno geslo z najmanj 12 znaki.
-- `JWT_SECRET`: naključen ključ, ki ga ustvarimo z ukazom:
+Geslo v `DATABASE_URL` mora ustrezati geslu PostgreSQL.
+Posebne znake v povezovalnem URL-ju URL-kodiramo.
+`SEED_PASSWORD` mora imeti najmanj 12 znakov.
+
+Naključen ključ za `JWT_SECRET` ustvarimo z ukazom:
 
 ```powershell
 node -e "console.log(require('node:crypto').randomBytes(48).toString('hex'))"
 ```
 
 Datotek `.env` in skrivnosti ne vključujemo v Git.
+Obstoječih konfiguracij ob ponovnem zagonu ne prepisujemo.
 
 ### 2. Baza in backend
 
@@ -62,6 +71,11 @@ Iz glavne mape:
 ```powershell
 docker compose up -d
 docker compose ps
+```
+
+Ko baza doseže stanje `healthy`, nadaljujemo:
+
+```powershell
 cd backend
 npm.cmd ci
 npm.cmd exec -- prisma generate
@@ -70,11 +84,11 @@ npm.cmd exec -- prisma db seed
 npm.cmd run dev
 ```
 
-Baza mora doseči stanje `healthy`. API deluje na
-`http://localhost:3000`, preverjanje dosegljivosti pa na `/api/health`.
+API deluje na `http://localhost:3000`.
+Endpoint `/api/health` preverja dosegljivost API-ja.
 
-Migracije in seed pripravijo tudi prazno bazo. Generirani Prisma
-klient ni v Git, zato je potreben korak `prisma generate`.
+Migracije in seed pripravijo tudi prazno bazo.
+Generirani Prisma klient ni v Git, zato ga ustvarimo z `prisma generate`.
 
 ### 3. Frontend
 
@@ -88,22 +102,26 @@ npm.cmd run dev
 
 Aplikacijo odpremo na `http://localhost:5173`.
 
-## Testni uporabniki
+## Uporaba
 
-| E-pošta | Vloga |
+| Testni uporabnik | Vloga |
 | --- | --- |
 | maja.vodja@example.com | Vodja |
 | ana.novak@example.com | Zaposleni |
 | luka.kovac@example.com | Zaposleni |
 
 Novi uporabniki dobijo geslo iz `SEED_PASSWORD`, shranjeno z bcrypt.
-Ponovljen seed ne podvoji uporabnikov in ne spreminja obstoječih gesel.
+Ponovljen seed ne podvoji uporabnikov in ne spremeni obstoječih gesel.
 
-Vodja prek »Pregled za vodjo« izbere teden, doda osnutke izmen in
-objavi urnik. Konec izmene mora biti po začetku.
+Vodja izbere »Pregled za vodjo«, določi teden, doda osnutke izmen
+in jih objavi. Konec izmene mora biti po začetku.
 
-Prijava se ohrani ob osvežitvi iste kartice. Ob odjavi ali poteku
-žetona je potrebna ponovna prijava.
+Zaposleni izbere »Moje izmene«. Koledar prikazuje samo njegove
+objavljene izmene ter omogoča preklapljanje med tedni.
+Za prazen teden se prikaže obvestilo.
+
+Osvežitev iste kartice ohrani prijavo. Po odjavi ali poteku žetona
+je potrebna ponovna prijava.
 
 ## API
 
@@ -112,20 +130,25 @@ Zaščitene poti zahtevajo glavo `Authorization: Bearer <žeton>`.
 | Metoda in pot | Dostop | Namen |
 | --- | --- | --- |
 | `GET /api/health` | Javno | Dosegljivost API-ja |
-| `POST /api/auth/login` | Javno | Prijava z emailom in geslom |
+| `POST /api/auth/login` | Javno | Prijava |
 | `GET /api/auth/me` | Prijavljen uporabnik | Podatki uporabnika |
 | `GET /api/shifts/employees` | Vodja | Seznam zaposlenih |
 | `POST /api/shifts` | Vodja | Ustvarjanje osnutka |
 | `GET /api/shifts?weekStart=2030-02-04` | Vodja | Tedenski urnik |
 | `POST /api/shifts/publish` | Vodja | Objava tedna |
 | `GET /api/me/shifts?weekStart=2030-02-04` | Zaposleni | Lastne objavljene izmene |
+| `GET /api/me/unavailability` | Zaposleni | Lastna nerazpoložljivost |
+| `POST /api/me/unavailability` | Zaposleni | Dodajanje nerazpoložljivosti |
+| `DELETE /api/me/unavailability/:id` | Zaposleni | Brisanje lastnega vnosa |
 
-Datumi so v obliki `YYYY-MM-DD`, ure pa `HH:mm`.
-`weekStart` mora biti ponedeljek. Objava sprejme telo `{ "weekStart": "2030-02-04" }`.
+Datumi imajo obliko `YYYY-MM-DD`, ure pa `HH:mm`.
+`weekStart` mora biti ponedeljek.
 
-Ustvarjanje izmene zahteva `employeeId`, `date`, `startTime` in `endTime`.
-Osebni urnik določi zaposlenega iz prijave, skriva osnutke in tuje
-izmene ter za prazen teden vrne `shifts: []`.
+- Prijava sprejme `email` in `password`.
+- Ustvarjanje izmene sprejme `employeeId`, `date`, `startTime` in `endTime`.
+- Objava sprejme `weekStart`.
+- Nerazpoložljivost sprejme `date`, `startTime` in `endTime`.
+- Osebne poti določijo zaposlenega iz prijave.
 
 ## Preverjanje
 
@@ -144,34 +167,36 @@ Za API teste enkrat ustvarimo ločeno bazo:
 docker compose exec database psql -U shiftflow -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE shiftflow_api_test;"
 ```
 
-Nato teste zaženemo:
+Če baza že obstaja, tega koraka ne ponavljamo. Teste zaženemo:
 
 ```powershell
 npm.cmd --prefix backend run test
 ```
 
-Skripta pripravi migracije in seed v `shiftflow_api_test` ter izvede
-teste prijave, pravic in urnikov. Uporablja konfiguracijo iz
-`backend/.env`; razvojne baze `shiftflow` ne spreminja.
+Skripta uporabi konfiguracijo iz `backend/.env`, pripravi migracije
+in seed v `shiftflow_api_test` ter izvede teste.
+Razvojne baze `shiftflow` ne spreminja.
 HTTP strežnika ni treba posebej zagnati.
 
 ## Zaustavitev
 
-Frontend in backend ustavimo s `Ctrl+C`. Iz glavne mape ustavimo bazo:
+Frontend in backend ustavimo s `Ctrl+C`.
+Iz glavne mape ustavimo bazo:
 
 ```powershell
 docker compose down
 ```
 
-Podatki ostanejo v Docker volume-u. Sprememba `POSTGRES_PASSWORD`
-v `.env` ne spremeni gesla že inicializirane baze.
+Podatki ostanejo v Docker volume-u. Sprememba gesla v `.env`
+ne spremeni gesla že inicializirane baze.
 
 ## Razvojni proces
 
-Vsaka naloga ima svojo razvojno vejo in GitHub Issue.
-Spremembe vključujemo v `main` prek PR z opisom, preverjanjem in
-povezavo `Closes #<številka>`. Napredek spremljamo na GitHub Projects
-v stolpcih To Do, Doing in Done.
+Za vsako nalogo uporabljamo ločeno vejo in GitHub Issue.
+Spremembe vključujemo v `main` prek PR z opisom, preverjanjem
+in povezavo `Closes #<številka>`.
+
+Napredek spremljamo v GitHub Projects: To Do → Doing → Done.
 
 ## Dokumentacija
 

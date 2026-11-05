@@ -4,6 +4,7 @@ import cors from "cors";
 import authRouter from "./routes/auth.js";
 import shiftsRouter from "./routes/shifts.js";
 import myShiftsRouter from "./routes/my-shifts.js";
+import unavailabilityRouter from "./routes/unavailability.js";
 
 export function createApp(frontendUrl: string) {
   const app = express();
@@ -23,7 +24,8 @@ export function createApp(frontendUrl: string) {
   app.use("/api/auth", authRouter);
   app.use("/api/shifts", shiftsRouter);
   app.use("/api/me", myShiftsRouter);
-
+  app.use("/api/me/unavailability", unavailabilityRouter);
+  
   app.use((_req, res) => {
     res.status(404).json({ message: "Pot ne obstaja." });
   });

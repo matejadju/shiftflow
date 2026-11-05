@@ -10,8 +10,9 @@ Spletna aplikacija za organizacijo delovnih izmen v manjših podjetjih.
 - API za dodajanje, pregled in brisanje lastne nerazpoložljivosti.
 - Obrazec, pregled in brisanje lastne nerazpoložljivosti.
 - Preprečevanje podvojenih in prekrivajočih obdobij nerazpoložljivosti.
+- API za oddajo zahtev za menjavo, izbor sodelavca in pregled lastnih zahtev.
 
-Menjave izmen sledijo v naslednjih nalogah.
+Uporabniški vmesnik za menjave, odgovor sodelavca in potrditev vodje sledijo v naslednjih nalogah.
 
 ## Tehnologije
 
@@ -146,6 +147,9 @@ Zaščitene poti zahtevajo glavo `Authorization: Bearer <žeton>`.
 | `GET /api/me/unavailability` | Zaposleni | Lastna nerazpoložljivost |
 | `POST /api/me/unavailability` | Zaposleni | Dodajanje nerazpoložljivosti |
 | `DELETE /api/me/unavailability/:id` | Zaposleni | Brisanje lastnega vnosa |
+| `GET /api/swap-requests/recipients` | Zaposleni | Izbor sodelavca |
+| `POST /api/swap-requests` | Zaposleni | Oddaja zahteve za menjavo |
+| `GET /api/swap-requests` | Zaposleni | Poslane in prejete zahteve |
 
 Datumi imajo obliko `YYYY-MM-DD`, ure pa `HH:mm`.
 `weekStart` mora biti ponedeljek.
@@ -155,6 +159,10 @@ Datumi imajo obliko `YYYY-MM-DD`, ure pa `HH:mm`.
 - Objava sprejme `weekStart`.
 - Nerazpoložljivost sprejme `date`, `startTime` in `endTime`.
 - Osebne poti določijo zaposlenega iz prijave.
+- Oddaja zahteve sprejme `shiftId` in `recipientId`. Zaposleni lahko predlaga samo svojo objavljeno izmeno drugemu zaposlenemu.
+- Nova zahteva dobi status `PENDING`; urnik ostane nespremenjen.
+- Za isto izmeno je dovoljena največ ena odprta zahteva (`PENDING` ali `ACCEPTED`), sicer API vrne 409.
+- Zahtevo vidita samo predlagatelj in prevzemnik.
 
 ## Preverjanje
 

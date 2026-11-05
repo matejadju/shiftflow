@@ -5,6 +5,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { ManagerPage } from "./pages/ManagerPage";
 import "./App.css";
 import { MySchedulePage } from "./pages/MySchedulePage";
+import { UnavailabilityPage } from "./pages/UnavailabilityPage";
 
 function App() {
   return (
@@ -16,6 +17,10 @@ function App() {
 
         <Route element={<ProtectedRoute allowedRoles={["EMPLOYEE"]} />}>
           <Route path="/my-schedule" element={<MySchedulePage />} />
+          <Route
+            path="/unavailability"
+            element={<UnavailabilityPage />}
+          />
         </Route>
 
         <Route

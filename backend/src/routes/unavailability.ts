@@ -12,6 +12,7 @@ import {
   createUnavailabilitySchema,
   unavailabilityIdSchema
 } from "../validation/unavailability.js";
+import { isUnavailabilityOverlapError } from "../lib/unavailability-conflict.js";
 
 const router = Router();
 
@@ -51,20 +52,46 @@ router.post("/", async (req, res, next) => {
     return;
   }
 
+  const conflictMessage =
+    "Za izbrani čas že imate vneseno nerazpoložljivost.";
+
   try {
     const input = result.data;
+    const date = toDatabaseDate(input.date);
+    const startTime = toDatabaseTime(input.startTime);
+    const endTime = toDatabaseTime(input.endTime);
+
+    const existing = await prisma.unavailability.findFirst({
+      where: {
+        employeeId: user.id,
+        date,
+        startTime: { lt: endTime },
+        endTime: { gt: startTime }
+      },
+      select: { id: true }
+    });
+
+    if (existing) {
+      res.status(409).json({ message: conflictMessage });
+      return;
+    }
 
     const entry = await prisma.unavailability.create({
       data: {
         employeeId: user.id,
-        date: toDatabaseDate(input.date),
-        startTime: toDatabaseTime(input.startTime),
-        endTime: toDatabaseTime(input.endTime)
+        date,
+        startTime,
+        endTime
       }
     });
 
     res.status(201).json({ unavailability: serialize(entry) });
   } catch (error) {
+    if (isUnavailabilityOverlapError(error)) {
+      res.status(409).json({ message: conflictMessage });
+      return;
+    }
+
     next(error);
   }
 });

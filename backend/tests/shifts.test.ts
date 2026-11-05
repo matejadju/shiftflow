@@ -158,7 +158,7 @@ test("Pregled in objava zahtevata veljaven ponedeljek", async () => {
 });
 
 test("Tedenski pregled in objava upoštevata meje tedna", async () => {
-  const monday = await createShift();
+  const monday = await createShift("2030-01-08");
   const sunday = await createShift("2030-01-13");
   const nextMonday = await createShift(nextWeekStart);
 

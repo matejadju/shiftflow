@@ -39,6 +39,11 @@ export function DashboardPage() {
                 Moje izmene
             </Link>
            )}
+           {user.role === "EMPLOYEE" && (
+            <Link className="button-link" to="/unavailability">
+                Moja nerazpoložljivost
+            </Link>
+            )}
 
           <button className="secondary" onClick={signOut}>
             Odjava

@@ -7,11 +7,11 @@ Spletna aplikacija za organizacijo delovnih izmen v manjših podjetjih.
 - Prijava z JWT, preverjanje vlog, zaščitene strani in odjava.
 - Priprava, dodeljevanje in objava tedenskega urnika za vodjo.
 - Koledarski pregled lastnih objavljenih izmen zaposlenega.
-- API za dodajanje, pregled in brisanje lastne nerazpoložljivosti
-  (v razvoju – T09).
+- API za dodajanje, pregled in brisanje lastne nerazpoložljivosti.
+- Obrazec, pregled in brisanje lastne nerazpoložljivosti.
+- Preprečevanje podvojenih in prekrivajočih obdobij nerazpoložljivosti.
 
-Vmesnik za nerazpoložljivost in menjave izmen sledijo v naslednjih nalogah.
-Preprečevanje prekrivanja izmen pri ustvarjanju še ni implementirano.
+Menjave izmen sledijo v naslednjih nalogah.
 
 ## Tehnologije
 
@@ -119,6 +119,12 @@ in jih objavi. Konec izmene mora biti po začetku.
 Zaposleni izbere »Moje izmene«. Koledar prikazuje samo njegove
 objavljene izmene ter omogoča preklapljanje med tedni.
 Za prazen teden se prikaže obvestilo.
+
+Zaposleni prek »Moja nerazpoložljivost« vnese datum in časovni interval,
+pregleda svoje vnose ter jih odstrani s potrditvijo.
+Konec mora biti po začetku. Prekrivajoči vnosi istega zaposlenega
+so zavrnjeni z odgovorom 409; stični intervali so dovoljeni.
+Zaščita velja tudi ob sočasnih zahtevah.
 
 Osvežitev iste kartice ohrani prijavo. Po odjavi ali poteku žetona
 je potrebna ponovna prijava.

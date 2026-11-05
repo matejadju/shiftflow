@@ -12,6 +12,7 @@ import {
   toDatabaseDate,
   toDatabaseTime
 } from "../src/lib/shift-time.js";
+import { isUnavailabilityOverlapError } from "../src/lib/unavailability-conflict.js";
 
 assert.equal(
   new URL(config.DATABASE_URL).pathname,
@@ -218,7 +219,7 @@ test("Pregled vrne samo lastne vnose v pravilnem vrstnem redu", async () => {
 });
 
 test("Lastni vnos je mogoče izbrisati", async () => {
-  const entry = await createEntry(employeeId);
+  const entry = await createEntry(employeeId, "2030-04-11");
 
   await request(app)
     .delete(`/api/me/unavailability/${entry.id}`)
@@ -238,7 +239,7 @@ test("Lastni vnos je mogoče izbrisati", async () => {
 });
 
 test("Tujega vnosa ni mogoče izbrisati", async () => {
-  const foreign = await createEntry(otherEmployeeId);
+  const foreign = await createEntry(otherEmployeeId, "2030-04-12");
 
   await request(app)
     .delete(`/api/me/unavailability/${foreign.id}`)
@@ -261,6 +262,140 @@ test("Tujega vnosa ni mogoče izbrisati", async () => {
     .delete("/api/me/unavailability/invalid")
     .set("Authorization", `Bearer ${employeeToken}`)
     .expect(400);
+});
+
+function postUnavailability(
+  date: string,
+  startTime: string,
+  endTime: string,
+  token = employeeToken
+) {
+  return request(app)
+    .post("/api/me/unavailability")
+    .set("Authorization", `Bearer ${token}`)
+    .send({ date, startTime, endTime });
+}
+
+test("Enaki in prekrivajoči vnosi nerazpoložljivosti vrnejo 409", async () => {
+  const date = "2031-06-01";
+
+  await createEntry(employeeId, date); // 09:00–12:00
+
+  for (const [startTime, endTime] of [
+    ["09:00", "12:00"],
+    ["08:00", "10:00"],
+    ["11:00", "13:00"],
+    ["10:00", "11:00"],
+    ["08:00", "16:00"]
+  ]) {
+    const response = await postUnavailability(
+      date,
+      startTime,
+      endTime
+    ).expect(409);
+
+    assert.equal(
+      response.body.message,
+      "Za izbrani čas že imate vneseno nerazpoložljivost."
+    );
+  }
+
+  const count = await prisma.unavailability.count({
+    where: {
+      employeeId,
+      date: toDatabaseDate(date)
+    }
+  });
+
+  assert.equal(count, 1);
+});
+
+test("Stična obdobja nerazpoložljivosti so dovoljena", async () => {
+  const date = "2031-06-02";
+
+  await createEntry(employeeId, date); // 09:00–12:00
+
+  for (const [startTime, endTime] of [
+    ["08:00", "09:00"],
+    ["12:00", "16:00"]
+  ]) {
+    const response = await postUnavailability(
+      date,
+      startTime,
+      endTime
+    ).expect(201);
+
+    entryIds.push(response.body.unavailability.id);
+  }
+});
+
+test("Isti interval je dovoljen drugemu zaposlenemu ali drug dan", async () => {
+  await createEntry(employeeId, "2031-06-03");
+
+  const otherEmployee = await postUnavailability(
+    "2031-06-03",
+    "09:00",
+    "12:00",
+    otherEmployeeToken
+  ).expect(201);
+
+  entryIds.push(otherEmployee.body.unavailability.id);
+
+  const otherDay = await postUnavailability(
+    "2031-06-04",
+    "09:00",
+    "12:00"
+  ).expect(201);
+
+  entryIds.push(otherDay.body.unavailability.id);
+});
+
+test("Sočasna prekrivajoča vnosa ustvarita samo en zapis", async () => {
+  const date = "2031-06-05";
+
+  const responses = await Promise.all([
+    postUnavailability(date, "08:00", "12:00"),
+    postUnavailability(date, "09:00", "13:00")
+  ]);
+
+  for (const response of responses) {
+    if (response.status === 201) {
+      entryIds.push(response.body.unavailability.id);
+    }
+  }
+
+  assert.deepEqual(
+    responses.map((response) => response.status).sort(),
+    [201, 409]
+  );
+
+  const count = await prisma.unavailability.count({
+    where: {
+      employeeId,
+      date: toDatabaseDate(date)
+    }
+  });
+
+  assert.equal(count, 1);
+});
+
+test("Baza prepreči prekrivanje nerazpoložljivosti mimo API-ja", async () => {
+  const date = "2031-06-06";
+
+  await createEntry(employeeId, date); // 09:00–12:00
+
+  await assert.rejects(
+    () =>
+      prisma.unavailability.create({
+        data: {
+          employeeId,
+          date: toDatabaseDate(date),
+          startTime: toDatabaseTime("10:00"),
+          endTime: toDatabaseTime("13:00")
+        }
+      }),
+    (error: unknown) => isUnavailabilityOverlapError(error)
+  );
 });
 
 after(async () => {

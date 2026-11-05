@@ -4,6 +4,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ManagerPage } from "./pages/ManagerPage";
 import "./App.css";
+import { MySchedulePage } from "./pages/MySchedulePage";
 
 function App() {
   return (
@@ -12,6 +13,10 @@ function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<DashboardPage />} />
+
+        <Route element={<ProtectedRoute allowedRoles={["EMPLOYEE"]} />}>
+          <Route path="/my-schedule" element={<MySchedulePage />} />
+        </Route>
 
         <Route
           element={<ProtectedRoute allowedRoles={["MANAGER"]} />}

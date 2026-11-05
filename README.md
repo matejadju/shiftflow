@@ -9,9 +9,9 @@ Implementirano:
 - Priprava, dodeljevanje in objava tedenskega urnika za vodjo.
 - API za pregled lastnih objavljenih izmen zaposlenega.
 - Podatkovni modeli, migracije in začetni uporabniki.
+- Koledarski pregled lastnih objavljenih izmen s preklapljanjem med tedni.
 
-Koledarski vmesnik zaposlenega, nerazpoložljivost in menjave izmen
-sledijo v naslednjih nalogah.
+Nerazpoložljivost in menjave izmen sledijo v naslednjih nalogah.
 
 ## Tehnologije
 

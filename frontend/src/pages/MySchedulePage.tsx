@@ -3,7 +3,16 @@ import { Link } from "react-router-dom";
 import { ApiError } from "../api/auth";
 import { getMyShifts } from "../api/my-shifts";
 import type { MyShift } from "../api/my-shifts";
+import {
+  getSwapRequests,
+  swapStatusLabels
+} from "../api/swap-requests";
+import type {
+  CreatedSwapRequest,
+  SwapStatus
+} from "../api/swap-requests";
 import { useAuth } from "../auth/useAuth";
+import { SwapProposalForm } from "../components/SwapProposalForm";
 import {
   addDays,
   displayDate,
@@ -21,8 +30,14 @@ const dayNames = [
   "Nedelja"
 ];
 
+type OpenSwap = {
+  shiftId: string;
+  status: SwapStatus;
+};
+
 export function MySchedulePage() {
-  const { token, signOut, expireSession } = useAuth();
+  const { token, user, signOut, expireSession } = useAuth();
+
   const [weekStart, setWeekStart] = useState(() =>
     getMonday(formatLocalDate(new Date()))
   );
@@ -39,6 +54,9 @@ export function MySchedulePage() {
         <nav className="actions" aria-label="Navigacija zaposlenega">
           <Link className="button-link" to="/">
             Začetna stran
+          </Link>
+          <Link className="button-link" to="/unavailability">
+            Moja nerazpoložljivost
           </Link>
           <button className="secondary" onClick={signOut}>
             Odjava
@@ -80,10 +98,11 @@ export function MySchedulePage() {
           {displayDate(weekStart)} – {displayDate(addDays(weekStart, 6))}
         </h2>
 
-        {token && (
+        {token && user && (
           <WeekCalendar
             key={`${weekStart}-${revision}`}
             token={token}
+            userId={user.id}
             weekStart={weekStart}
             onUnauthorized={expireSession}
             onRetry={() => setRevision((value) => value + 1)}
@@ -96,6 +115,7 @@ export function MySchedulePage() {
 
 type WeekCalendarProps = {
   token: string;
+  userId: string;
   weekStart: string;
   onUnauthorized: () => void;
   onRetry: () => void;
@@ -103,27 +123,47 @@ type WeekCalendarProps = {
 
 function WeekCalendar({
   token,
+  userId,
   weekStart,
   onUnauthorized,
   onRetry
 }: WeekCalendarProps) {
   const [shifts, setShifts] = useState<MyShift[]>([]);
+  const [openSwaps, setOpenSwaps] = useState<OpenSwap[]>([]);
+  const [selectedShift, setSelectedShift] = useState<MyShift | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function load() {
       try {
-        const result = await getMyShifts(
-          token,
-          weekStart,
-          controller.signal
-        );
+        const [weeklyShifts, requests] = await Promise.all([
+          getMyShifts(token, weekStart, controller.signal),
+          getSwapRequests(token, controller.signal)
+        ]);
 
         if (!controller.signal.aborted) {
-          setShifts(result);
+          setShifts(weeklyShifts);
+
+          setOpenSwaps(
+            requests
+              .filter(
+                (entry) =>
+                  entry.requester.id === userId &&
+                  (entry.status === "PENDING" ||
+                    entry.status === "ACCEPTED")
+              )
+              .map((entry) => ({
+                shiftId: entry.shift.id,
+                status: entry.status
+              }))
+          );
+
           setLoading(false);
         }
       } catch (error) {
@@ -139,7 +179,7 @@ function WeekCalendar({
         setError(
           error instanceof ApiError
             ? error.message
-            : "Izmen ni bilo mogoče naložiti."
+            : "Koledarja in zahtev ni bilo mogoče naložiti."
         );
         setLoading(false);
       }
@@ -148,10 +188,25 @@ function WeekCalendar({
     void load();
 
     return () => controller.abort();
-  }, [token, weekStart, onUnauthorized]);
+  }, [token, userId, weekStart, onUnauthorized]);
+
+  function handleCreated(entry: CreatedSwapRequest) {
+    setOpenSwaps((current) => [
+      ...current.filter((item) => item.shiftId !== entry.shiftId),
+      {
+        shiftId: entry.shiftId,
+        status: entry.status
+      }
+    ]);
+
+    setSelectedShift(null);
+    setNotice(
+      "Zahteva je poslana in je v čakanju. Urnik ostaja nespremenjen."
+    );
+  }
 
   if (loading) {
-    return <p role="status">Nalaganje izmen …</p>;
+    return <p role="status">Nalaganje koledarja …</p>;
   }
 
   if (error) {
@@ -169,6 +224,25 @@ function WeekCalendar({
 
   return (
     <>
+      <div className="actions">
+        <button className="secondary" onClick={onRetry}>
+          Osveži koledar
+        </button>
+      </div>
+
+      {notice && <p role="status">{notice}</p>}
+
+      {selectedShift && (
+        <SwapProposalForm
+          key={selectedShift.id}
+          token={token}
+          shift={selectedShift}
+          onUnauthorized={onUnauthorized}
+          onCreated={handleCreated}
+          onCancel={() => setSelectedShift(null)}
+        />
+      )}
+
       {shifts.length === 0 && (
         <p role="status">
           Za izbrani teden nimate objavljenih izmen.
@@ -200,20 +274,47 @@ function WeekCalendar({
                 <p className="calendar-empty">Brez izmen</p>
               ) : (
                 <ul className="calendar-shifts">
-                  {dailyShifts.map((shift) => (
-                    <li key={shift.id}>
-                      <span>Delovna izmena</span>
-                      <strong>
-                        <time dateTime={`${date}T${shift.startTime}`}>
-                          {shift.startTime}
-                        </time>
-                        {" – "}
-                        <time dateTime={`${date}T${shift.endTime}`}>
-                          {shift.endTime}
-                        </time>
-                      </strong>
-                    </li>
-                  ))}
+                  {dailyShifts.map((shift) => {
+                    const openSwap = openSwaps.find(
+                      (entry) => entry.shiftId === shift.id
+                    );
+
+                    return (
+                      <li key={shift.id}>
+                        <span>Delovna izmena</span>
+                        <strong>
+                          <time dateTime={`${date}T${shift.startTime}`}>
+                            {shift.startTime}
+                          </time>
+                          {" – "}
+                          <time dateTime={`${date}T${shift.endTime}`}>
+                            {shift.endTime}
+                          </time>
+                        </strong>
+
+                        {openSwap ? (
+                          <p className="swap-status">
+                            Menjava: {swapStatusLabels[openSwap.status]}
+                          </p>
+                        ) : (
+                          <button
+                            className="secondary swap-proposal-button"
+                            disabled={selectedShift !== null}
+                            onClick={() => {
+                              setNotice("");
+                              setSelectedShift(shift);
+                            }}
+                            aria-label={
+                              `Predlagaj menjavo ${displayDate(date)}, ` +
+                              `${shift.startTime}–${shift.endTime}`
+                            }
+                          >
+                            Predlagaj menjavo
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </section>

@@ -321,3 +321,15 @@ th {
 .calendar-shifts span {
   font-size: 0.8rem;
 }
+.swap-status {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.swap-proposal-button {
+  width: 100%;
+  padding: 8px;
+  font-size: 0.875rem;
+  white-space: normal;
+}

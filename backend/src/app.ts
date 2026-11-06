@@ -6,6 +6,7 @@ import shiftsRouter from "./routes/shifts.js";
 import myShiftsRouter from "./routes/my-shifts.js";
 import unavailabilityRouter from "./routes/unavailability.js";
 import swapRequestsRouter from "./routes/swap-requests.js";
+import managerSwapsRouter from "./routes/manager-swaps.js";
 
 export function createApp(frontendUrl: string) {
   const app = express();
@@ -27,6 +28,7 @@ export function createApp(frontendUrl: string) {
   app.use("/api/me", myShiftsRouter);
   app.use("/api/me/unavailability", unavailabilityRouter);
   app.use("/api/swap-requests", swapRequestsRouter);
+  app.use("/api/manager/swap-requests", managerSwapsRouter);
   
   app.use((_req, res) => {
     res.status(404).json({ message: "Pot ne obstaja." });

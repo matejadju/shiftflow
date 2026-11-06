@@ -14,8 +14,9 @@ Spletna aplikacija za organizacijo delovnih izmen v manjših podjetjih.
 - Predlog menjave iz osebnega koledarja z izbiro sodelavca in prikazom odprte zahteve.
 - API za sprejem ali zavrnitev zahteve s strani izbranega prevzemnika.
 - Pregled prejetih zahtev ter sprejem ali zavrnitev predloga menjave.
+- API za odločitev vodje o sprejeti menjavi s preverjanjem konfliktov in transakcijsko posodobitvijo urnika.
 
-Potrditev menjave s strani vodje sledi v naslednjih nalogah.
+Vmesnik za odločanje vodje sledi v nalogi T16.
 
 ## Tehnologije
 
@@ -181,6 +182,11 @@ Datumi imajo obliko `YYYY-MM-DD`, ure pa `HH:mm`.
 - `PENDING`. Sprejem nastavi `ACCEPTED`, zavrnitev pa `REJECTED`.
 - Urnik v obeh primerih ostane nespremenjen; sprejeta zahteva čaka na vodjo.
 - Ponoven ali sočasen drugi odgovor je zavrnjen z odgovorom 409.
+- Odločitev vodje sprejme `decision`: `APPROVE` ali `REJECT`.
+- Odločanje je dovoljeno samo za status `ACCEPTED`.
+- Pred potrditvijo sistem preveri lastništvo in objavljenost izmene, vlogo prevzemnika, prekrivanje z njegovimi izmenami in nerazpoložljivost.
+Konflikt vrne 409 z razlogom, brez spremembe zahteve ali urnika.
+Uspešna potrditev v eni transakciji spremeni zaposlenega na izmeni in status zahteve v `APPROVED`. Zavrnitev nastavi `REJECTED`, urnik pa ostane nespremenjen.
 
 ## Preverjanje
 

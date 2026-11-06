@@ -11,8 +11,9 @@ Spletna aplikacija za organizacijo delovnih izmen v manjših podjetjih.
 - Obrazec, pregled in brisanje lastne nerazpoložljivosti.
 - Preprečevanje podvojenih in prekrivajočih obdobij nerazpoložljivosti.
 - API za oddajo zahtev za menjavo, izbor sodelavca in pregled lastnih zahtev.
+- Predlog menjave iz osebnega koledarja z izbiro sodelavca in prikazom odprte zahteve.
 
-Uporabniški vmesnik za menjave, odgovor sodelavca in potrditev vodje sledijo v naslednjih nalogah.
+Odgovor sodelavca in potrditev menjave s strani vodje sledita v naslednjih nalogah.
 
 ## Tehnologije
 
@@ -126,6 +127,11 @@ pregleda svoje vnose ter jih odstrani s potrditvijo.
 Konec mora biti po začetku. Prekrivajoči vnosi istega zaposlenega
 so zavrnjeni z odgovorom 409; stični intervali so dovoljeni.
 Zaščita velja tudi ob sočasnih zahtevah.
+
+Zaposleni v koledarju izbere »Predlagaj menjavo«, določi sodelavca
+in pošlje zahtevo. Pri izmeni se prikaže status »V čakanju«.
+Dokler je zahteva odprta, nova oddaja za isto izmeno ni na voljo.
+Oddaja zahteve še ne spremeni urnika.
 
 Osvežitev iste kartice ohrani prijavo. Po odjavi ali poteku žetona
 je potrebna ponovna prijava.

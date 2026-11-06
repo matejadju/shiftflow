@@ -249,3 +249,4 @@ Napredek spremljamo v GitHub Projects: To Do → Doing → Done.
 - [Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md)
 - [Wireframe-i](docs/06-wireframes.md)
 - [Arhitekturne odločitve](docs/adr/README.md)
+- [Preverjanje MVP](docs/07-preverjanje-mvp.md)

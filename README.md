@@ -12,8 +12,10 @@ Spletna aplikacija za organizacijo delovnih izmen v manjših podjetjih.
 - Preprečevanje podvojenih in prekrivajočih obdobij nerazpoložljivosti.
 - API za oddajo zahtev za menjavo, izbor sodelavca in pregled lastnih zahtev.
 - Predlog menjave iz osebnega koledarja z izbiro sodelavca in prikazom odprte zahteve.
+- API za sprejem ali zavrnitev zahteve s strani izbranega prevzemnika.
+- Pregled prejetih zahtev ter sprejem ali zavrnitev predloga menjave.
 
-Odgovor sodelavca in potrditev menjave s strani vodje sledita v naslednjih nalogah.
+Potrditev menjave s strani vodje sledi v naslednjih nalogah.
 
 ## Tehnologije
 
@@ -133,6 +135,10 @@ in pošlje zahtevo. Pri izmeni se prikaže status »V čakanju«.
 Dokler je zahteva odprta, nova oddaja za isto izmeno ni na voljo.
 Oddaja zahteve še ne spremeni urnika.
 
+Zaposleni prek »Prejete zahteve« pregleda predloge sodelavcev.
+Na čakajočo zahtevo odgovori z »Sprejmi« ali »Zavrni«.
+Sprejeta zahteva čaka na vodjo; odgovor še ne spremeni urnika.
+
 Osvežitev iste kartice ohrani prijavo. Po odjavi ali poteku žetona
 je potrebna ponovna prijava.
 
@@ -156,6 +162,7 @@ Zaščitene poti zahtevajo glavo `Authorization: Bearer <žeton>`.
 | `GET /api/swap-requests/recipients` | Zaposleni | Izbor sodelavca |
 | `POST /api/swap-requests` | Zaposleni | Oddaja zahteve za menjavo |
 | `GET /api/swap-requests` | Zaposleni | Poslane in prejete zahteve |
+| `PATCH /api/swap-requests/:id/respond` | Izbrani prevzemnik | Sprejem ali zavrnitev zahteve |
 
 Datumi imajo obliko `YYYY-MM-DD`, ure pa `HH:mm`.
 `weekStart` mora biti ponedeljek.
@@ -169,6 +176,11 @@ Datumi imajo obliko `YYYY-MM-DD`, ure pa `HH:mm`.
 - Nova zahteva dobi status `PENDING`; urnik ostane nespremenjen.
 - Za isto izmeno je dovoljena največ ena odprta zahteva (`PENDING` ali `ACCEPTED`), sicer API vrne 409.
 - Zahtevo vidita samo predlagatelj in prevzemnik.
+- Odgovor na zahtevo sprejme `decision` z vrednostjo `ACCEPT` ali `REJECT`.
+- Odgovori lahko samo izbrani prevzemnik in samo na zahtevo v stanju
+- `PENDING`. Sprejem nastavi `ACCEPTED`, zavrnitev pa `REJECTED`.
+- Urnik v obeh primerih ostane nespremenjen; sprejeta zahteva čaka na vodjo.
+- Ponoven ali sočasen drugi odgovor je zavrnjen z odgovorom 409.
 
 ## Preverjanje
 

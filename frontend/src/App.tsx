@@ -7,6 +7,7 @@ import "./App.css";
 import { MySchedulePage } from "./pages/MySchedulePage";
 import { UnavailabilityPage } from "./pages/UnavailabilityPage";
 import { ReceivedRequestsPage } from "./pages/ReceivedRequestsPage";
+import { ManagerSwapsPage } from "./pages/ManagerSwapsPage";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           element={<ProtectedRoute allowedRoles={["MANAGER"]} />}
         >
           <Route path="/manager" element={<ManagerPage />} />
+          <Route path="/manager/swaps" element={<ManagerSwapsPage />} />
         </Route>
       </Route>
 

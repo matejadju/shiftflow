@@ -34,6 +34,11 @@ export function DashboardPage() {
               Pregled za vodjo
             </Link>
           )}
+          {user.role === "MANAGER" && (
+            <Link className="button-link" to="/manager/swaps">
+                Potrditev menjav
+            </Link>
+          )}
           {user.role === "EMPLOYEE" && (
             <Link className="button-link" to="/my-schedule">
                 Moje izmene

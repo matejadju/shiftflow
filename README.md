@@ -15,8 +15,7 @@ Spletna aplikacija za organizacijo delovnih izmen v manjših podjetjih.
 - API za sprejem ali zavrnitev zahteve s strani izbranega prevzemnika.
 - Pregled prejetih zahtev ter sprejem ali zavrnitev predloga menjave.
 - API za odločitev vodje o sprejeti menjavi s preverjanjem konfliktov in transakcijsko posodobitvijo urnika.
-
-Vmesnik za odločanje vodje sledi v nalogi T16.
+- Pregled sprejetih zahtev ter potrditev ali zavrnitev menjave v vmesniku vodje.
 
 ## Tehnologije
 
@@ -118,6 +117,9 @@ Aplikacijo odpremo na `http://localhost:5173`.
 Novi uporabniki dobijo geslo iz `SEED_PASSWORD`, shranjeno z bcrypt.
 Ponovljen seed ne podvoji uporabnikov in ne spremeni obstoječih gesel.
 
+Osvežitev iste kartice ohrani prijavo. Po odjavi ali poteku žetona
+je potrebna ponovna prijava.
+
 Vodja izbere »Pregled za vodjo«, določi teden, doda osnutke izmen
 in jih objavi. Konec izmene mora biti po začetku.
 
@@ -140,8 +142,10 @@ Zaposleni prek »Prejete zahteve« pregleda predloge sodelavcev.
 Na čakajočo zahtevo odgovori z »Sprejmi« ali »Zavrni«.
 Sprejeta zahteva čaka na vodjo; odgovor še ne spremeni urnika.
 
-Osvežitev iste kartice ohrani prijavo. Po odjavi ali poteku žetona
-je potrebna ponovna prijava.
+Vodja prek »Potrditev menjav« pregleda sprejete zahteve.
+Potrditev preveri konflikte in posodobi dodelitev izmene.
+Ob konfliktu se prikaže razlog, zavrnitev pa ohrani obstoječi urnik.
+Po uspešni odločitvi zahteva izgine s seznama za odločanje.
 
 ## API
 

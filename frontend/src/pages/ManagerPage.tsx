@@ -37,6 +37,9 @@ export function ManagerPage() {
           <Link className="button-link" to="/">
             Začetna stran
           </Link>
+          <Link className="button-link" to="/manager/swaps">
+            Potrditev menjav
+          </Link>
           <button className="secondary" onClick={signOut}>
             Odjava
           </button>

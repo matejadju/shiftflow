@@ -6,3 +6,11 @@ export const createSwapRequestSchema = z
     recipientId: z.string().uuid()
   })
   .strict();
+
+export const swapRequestIdSchema = z.string().uuid();
+
+export const respondToSwapRequestSchema = z
+  .object({
+    decision: z.enum(["ACCEPT", "REJECT"])
+  })
+  .strict();

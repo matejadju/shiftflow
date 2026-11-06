@@ -101,3 +101,34 @@ export async function createSwapRequest(
 
   return result.swapRequest;
 }
+
+export type SwapDecision = "ACCEPT" | "REJECT";
+
+export type SwapResponseResult = {
+  id: string;
+  status: "ACCEPTED" | "REJECTED";
+};
+
+export async function respondToSwapRequest(
+  token: string,
+  id: string,
+  decision: SwapDecision
+): Promise<SwapResponseResult> {
+  const response = await fetch(
+    `/api/swap-requests/${encodeURIComponent(id)}/respond`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ decision })
+    }
+  );
+
+  const result = await readResponse<{
+    swapRequest: SwapResponseResult;
+  }>(response);
+
+  return result.swapRequest;
+}

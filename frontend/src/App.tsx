@@ -6,6 +6,7 @@ import { ManagerPage } from "./pages/ManagerPage";
 import "./App.css";
 import { MySchedulePage } from "./pages/MySchedulePage";
 import { UnavailabilityPage } from "./pages/UnavailabilityPage";
+import { ReceivedRequestsPage } from "./pages/ReceivedRequestsPage";
 
 function App() {
   return (
@@ -20,6 +21,10 @@ function App() {
           <Route
             path="/unavailability"
             element={<UnavailabilityPage />}
+          />
+          <Route
+            path="/received-requests"
+            element={<ReceivedRequestsPage />}
           />
         </Route>
 

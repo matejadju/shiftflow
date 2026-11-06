@@ -333,3 +333,10 @@ th {
   font-size: 0.875rem;
   white-space: normal;
 }
+
+.request-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}

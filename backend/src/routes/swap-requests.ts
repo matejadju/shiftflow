@@ -7,7 +7,11 @@ import {
 } from "../generated/prisma/enums.js";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
-import { createSwapRequestSchema } from "../validation/swap-requests.js";
+import {
+  createSwapRequestSchema,
+  respondToSwapRequestSchema,
+  swapRequestIdSchema
+} from "../validation/swap-requests.js";
 import { formatDate, formatTime } from "../lib/shift-time.js";
 
 const router = Router();
@@ -224,6 +228,85 @@ router.get("/", async (_req, res, next) => {
           endTime: formatTime(entry.shift.endTime)
         }
       }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch("/:id/respond", async (req, res, next) => {
+  const idResult = swapRequestIdSchema.safeParse(req.params.id);
+  const bodyResult = respondToSwapRequestSchema.safeParse(req.body);
+
+  if (!idResult.success || !bodyResult.success) {
+    res.status(400).json({
+      message: "Podajte veljavno zahtevo in odločitev ACCEPT ali REJECT."
+    });
+    return;
+  }
+
+  const user = res.locals.user;
+
+  if (!user) {
+    res.status(401).json({ message: "Potrebna je prijava." });
+    return;
+  }
+
+  const id = idResult.data;
+  const status =
+    bodyResult.data.decision === "ACCEPT"
+      ? SwapStatus.ACCEPTED
+      : SwapStatus.REJECTED;
+
+  try {
+    const existing = await prisma.swapRequest.findFirst({
+      where: {
+        id,
+        recipientId: user.id
+      },
+      select: {
+        status: true
+      }
+    });
+
+    // Ne razkrivamo zahtev, pri katerih uporabnik ni prevzemnik.
+    if (!existing) {
+      res.status(404).json({
+        message: "Prejeta zahteva ne obstaja."
+      });
+      return;
+    }
+
+    if (existing.status !== SwapStatus.PENDING) {
+      res.status(409).json({
+        message: "Na to zahtevo ni več mogoče odgovoriti."
+      });
+      return;
+    }
+
+    // Pogoj preverimo tudi pri posodobitvi, da ob sočasnih
+    // odgovorih uspe samo prvi.
+    const updated = await prisma.swapRequest.updateMany({
+      where: {
+        id,
+        recipientId: user.id,
+        status: SwapStatus.PENDING
+      },
+      data: { status }
+    });
+
+    if (updated.count === 0) {
+      res.status(409).json({
+        message: "Na to zahtevo ni več mogoče odgovoriti."
+      });
+      return;
+    }
+
+    res.json({
+      swapRequest: {
+        id,
+        status
+      }
     });
   } catch (error) {
     next(error);

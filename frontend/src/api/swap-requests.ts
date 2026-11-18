@@ -1,3 +1,4 @@
+import { apiFetch } from "./client";
 import { readResponse } from "./auth";
 
 export type SwapStatus =
@@ -46,7 +47,7 @@ export async function getSwapRecipients(
   token: string,
   signal?: AbortSignal
 ): Promise<SwapParticipant[]> {
-  const response = await fetch("/api/swap-requests/recipients", {
+  const response = await apiFetch("/api/swap-requests/recipients", {
     headers: {
       Authorization: `Bearer ${token}`
     },
@@ -64,7 +65,7 @@ export async function getSwapRequests(
   token: string,
   signal?: AbortSignal
 ): Promise<SwapRequest[]> {
-  const response = await fetch("/api/swap-requests", {
+  const response = await apiFetch("/api/swap-requests", {
     headers: {
       Authorization: `Bearer ${token}`
     },
@@ -83,7 +84,7 @@ export async function createSwapRequest(
   shiftId: string,
   recipientId: string
 ): Promise<CreatedSwapRequest> {
-  const response = await fetch("/api/swap-requests", {
+  const response = await apiFetch("/api/swap-requests", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -114,7 +115,7 @@ export async function respondToSwapRequest(
   id: string,
   decision: SwapDecision
 ): Promise<SwapResponseResult> {
-  const response = await fetch(
+  const response = await apiFetch(
     `/api/swap-requests/${encodeURIComponent(id)}/respond`,
     {
       method: "PATCH",

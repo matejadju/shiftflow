@@ -1,3 +1,4 @@
+import { apiFetch } from "./client";
 import { readResponse } from "./auth";
 import type { SwapParticipant } from "./swap-requests";
 
@@ -26,7 +27,7 @@ export async function getManagerSwapRequests(
   token: string,
   signal?: AbortSignal
 ): Promise<ManagerSwapRequest[]> {
-  const response = await fetch("/api/manager/swap-requests", {
+  const response = await apiFetch("/api/manager/swap-requests", {
     headers: {
       Authorization: `Bearer ${token}`
     },
@@ -45,7 +46,7 @@ export async function decideManagerSwap(
   id: string,
   decision: ManagerSwapDecision
 ): Promise<ManagerSwapResult> {
-  const response = await fetch(
+  const response = await apiFetch(
     `/api/manager/swap-requests/${encodeURIComponent(id)}/decision`,
     {
       method: "PATCH",

@@ -1,3 +1,4 @@
+import { apiFetch } from "./client";
 import { readResponse } from "./auth";
 
 export type MyShift = {
@@ -14,7 +15,7 @@ export async function getMyShifts(
 ): Promise<MyShift[]> {
   const query = new URLSearchParams({ weekStart });
 
-  const response = await fetch(`/api/me/shifts?${query}`, {
+  const response = await apiFetch(`/api/me/shifts?${query}`, {
     headers: {
       Authorization: `Bearer ${token}`
     },

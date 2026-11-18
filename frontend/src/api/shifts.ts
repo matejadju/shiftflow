@@ -1,3 +1,4 @@
+import { apiFetch } from "./client";
 import { readResponse } from "./auth";
 
 export type Employee = {
@@ -28,7 +29,7 @@ export async function getEmployees(
   token: string,
   signal?: AbortSignal
 ): Promise<Employee[]> {
-  const response = await fetch("/api/shifts/employees", {
+  const response = await apiFetch("/api/shifts/employees", {
     headers: {
       Authorization: `Bearer ${token}`
     },
@@ -49,7 +50,7 @@ export async function getWeeklyShifts(
 ): Promise<Shift[]> {
   const query = new URLSearchParams({ weekStart });
 
-  const response = await fetch(`/api/shifts?${query}`, {
+  const response = await apiFetch(`/api/shifts?${query}`, {
     headers: {
       Authorization: `Bearer ${token}`
     },
@@ -68,7 +69,7 @@ export async function createShift(
   token: string,
   input: CreateShiftInput
 ): Promise<Shift> {
-  const response = await fetch("/api/shifts", {
+  const response = await apiFetch("/api/shifts", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -86,7 +87,7 @@ export async function publishWeek(
   token: string,
   weekStart: string
 ): Promise<number> {
-  const response = await fetch("/api/shifts/publish", {
+  const response = await apiFetch("/api/shifts/publish", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,

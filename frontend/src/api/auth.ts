@@ -1,3 +1,5 @@
+import { apiFetch } from "./client";
+
 export type Role = "EMPLOYEE" | "MANAGER" | "ADMIN";
 
 export type User = {
@@ -53,7 +55,7 @@ export async function login(
   email: string,
   password: string
 ): Promise<LoginResponse> {
-  const response = await fetch("/api/auth/login", {
+  const response = await apiFetch("/api/auth/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -68,7 +70,7 @@ export async function getCurrentUser(
   token: string,
   signal?: AbortSignal
 ): Promise<User> {
-  const response = await fetch("/api/auth/me", {
+  const response = await apiFetch("/api/auth/me", {
     headers: {
       Authorization: `Bearer ${token}`
     },

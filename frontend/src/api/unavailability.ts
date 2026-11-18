@@ -1,3 +1,4 @@
+import { apiFetch } from "./client";
 import { readResponse } from "./auth";
 
 export type Unavailability = {
@@ -17,7 +18,7 @@ export async function getUnavailabilities(
   token: string,
   signal?: AbortSignal
 ): Promise<Unavailability[]> {
-  const response = await fetch("/api/me/unavailability", {
+  const response = await apiFetch("/api/me/unavailability", {
     headers: {
       Authorization: `Bearer ${token}`
     },
@@ -35,7 +36,7 @@ export async function createUnavailability(
   token: string,
   input: CreateUnavailabilityInput
 ): Promise<Unavailability> {
-  const response = await fetch("/api/me/unavailability", {
+  const response = await apiFetch("/api/me/unavailability", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -55,7 +56,7 @@ export async function deleteUnavailability(
   token: string,
   id: string
 ): Promise<void> {
-  const response = await fetch(
+  const response = await apiFetch(
     `/api/me/unavailability/${encodeURIComponent(id)}`,
     {
       method: "DELETE",
